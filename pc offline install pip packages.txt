@@ -1,3 +1,6 @@
 https://stackoverflow.com/questions/11091623/how-to-install-packages-offline
 
 pip install --no-index --find-links /path/to/download/dir/ -r requirements.txt
+
+-- this --
+pip install package-name.whl -f ./ --no-index --no-deps
