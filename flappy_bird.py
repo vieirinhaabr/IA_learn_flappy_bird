@@ -4,7 +4,6 @@ import time
 import os
 import random
 import visualize
-import pickle
 pygame.font.init()
 
 WIN_WIDTH = 600
@@ -14,11 +13,14 @@ FLOOR = 730
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bird1.png'))), pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bird2.png'))), pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bird3.png')))]
 PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'pipe.png')))
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'base.png')))
-BG_IMG = pygame.transform.scale(pygame.image.load(os.path.join('imgs', 'bg.png')))
+BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join('imgs', 'bg.png')))
 
 STAT_FONT = pygame.font.SysFont('comicsans', 50)
 END_FONT = pygame.font.SysFont("comicsans", 70)
 DRAW_LINES = False
+
+WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+pygame.display.set_caption("Flappy Bird")
 
 GEN = 0
 
@@ -39,7 +41,7 @@ class Bird:
         self.img = self.IMGS[0]
 
     def jump(self):
-        self.vel = -10.5
+        self.vel = -5.5
         self.tick_count = 0
         self.height = self.y
 
@@ -49,7 +51,7 @@ class Bird:
         d = self.vel * self.tick_count + 0.5 * (3) * self.tick_count ** 2
 
         if d >= 16:
-            d = (d/abs(d))) * 16
+            d = (d/abs(d)) * 16
         if d < 0:
             d -= 2
 
@@ -88,7 +90,7 @@ class Bird:
 
 class Pipe:
     GAP = 200
-    VEL = 5
+    VEL = 10
 
     def __init__(self, x):
         self.x = x
@@ -116,7 +118,7 @@ class Pipe:
         win.blit(self.PIPE_TOP, (self.x, self.top))
         win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
 
-    def collide(self, bird):
+    def collide(self, bird, win):
         bird_mask = bird.get_mask()
         top_mask = pygame.mask.from_surface(self.PIPE_TOP)
         bottom_mask = pygame.mask.from_surface(self.PIPE_BOTTOM)
@@ -155,7 +157,7 @@ class Base:
         win.blit(self.IMG, (self.x1, self.y))
         win.blit(self.IMG, (self.x2, self.y))
 
-def draw_window(win, bird, pipes, base, score, gen, pipe_ind):
+def draw_window(win, birds, pipes, base, score, gen, pipe_ind):
     if gen == 0:
         gen = 1
     win.blit(BG_IMG, (0, 0))
@@ -193,9 +195,9 @@ def blitRotateCenter(surf, image, topleft, angle):
     surf.blit(rotated_image, new_rect.topleft)
 
 def main(genomes, config):
-    global WIN, gen
+    global WIN, GEN
     win = WIN
-    gen += 1
+    GEN += 1
     
     nets = []
     ge = []
@@ -245,6 +247,7 @@ def main(genomes, config):
         add_pipe = False
         for pipe in pipes:
             pipe.move()
+
             for bird in birds:
                 if pipe.collide(bird, win):
                     ge[birds.index(bird)].fitness -= 1
@@ -274,7 +277,7 @@ def main(genomes, config):
                 ge.pop(birds.index(bird))
                 birds.pop(birds.index(bird))
 
-        draw_window(WIN, birds, pipes, base, score, gen, pipe_ind)
+        draw_window(WIN, birds, pipes, base, score, GEN, pipe_ind)
 
 def run(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
