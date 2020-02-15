@@ -287,7 +287,7 @@ def eval_genomes(genomes, config):
     
     if score > SCORE_MAX[0]:
         SCORE_MAX[0] = score
-        SCORE_MAX[1] = gen
+        SCORE_MAX[1] = gen - 1
         SCORE_MAX[2] = genome.fitness
 
     print(b.HELP, 'ACTUAL SCORE:', score, 'from generation:', gen, 'with fitness:', genome.fitness, b.END)
