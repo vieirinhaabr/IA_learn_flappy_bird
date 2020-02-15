@@ -5,7 +5,10 @@ import time
 import neat
 import visualize
 import pickle
+import bcolors as b
 pygame.font.init()
+
+SCORE_MAX = [0, 0, 0]
 
 WIN_WIDTH = 600
 WIN_HEIGHT = 800
@@ -41,14 +44,14 @@ class Bird:
         self.img = self.IMGS[0]
 
     def jump(self):
-        self.vel = -10.5
+        self.vel = -10
         self.tick_count = 0
         self.height = self.y
 
     def move(self):
         self.tick_count += 1
 
-        displacement = self.vel*(self.tick_count) + 0.5*(3)*(self.tick_count)**2  # calculate displacement
+        displacement = self.vel*(self.tick_count) + 0.5*(3)*(self.tick_count)**2
 
         if displacement >= 16:
             displacement = (displacement/abs(displacement)) * 16
@@ -58,7 +61,7 @@ class Bird:
 
         self.y = self.y + displacement
 
-        if displacement < 0 or self.y < self.height + 50:  # tilt up
+        if displacement < 0 or self.y < self.height + 50:
             if self.tilt < self.MAX_ROTATION:
                 self.tilt = self.MAX_ROTATION
         else:
@@ -222,7 +225,7 @@ def eval_genomes(genomes, config):
 
     run = True
     while run and len(birds) > 0:
-        clock.tick(30)
+        clock.tick(60)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -281,11 +284,19 @@ def eval_genomes(genomes, config):
                 birds.pop(birds.index(bird))
 
         draw_window(WIN, birds, pipes, base, score, gen, pipe_ind)
+    
+    if score > SCORE_MAX[0]:
+        SCORE_MAX[0] = score
+        SCORE_MAX[1] = gen
+        SCORE_MAX[2] = genome.fitness
+
+    print(b.HELP, 'ACTUAL SCORE:', score, 'from generation:', gen, 'with fitness:', genome.fitness, b.END)
+    print(b.OKMSG, 'MAX SCORE FOR NOW:', SCORE_MAX[0], b.END, b.ERRMSG, 'by generation:', SCORE_MAX[1], b.END, b.BLUE, 'with fitness:', SCORE_MAX[2], b.END)
 
 def run(config_file):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_file)
+                                neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                config_file)
 
     p = neat.Population(config)
 
